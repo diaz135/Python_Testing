@@ -1,32 +1,23 @@
 import json
-from flask import Flask,render_template,request,redirect,flash,url_for
+from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return 'Hello, Flask!'
-
-
-
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
-
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
+def loadClubs():
+    with open('clubs.json') as c:
+        return json.load(c)['clubs']
+
+def loadCompetitions():
+    with open('competitions.json') as comps:
+        return json.load(comps)['competitions']
+
 competitions = loadCompetitions()
 clubs = loadClubs()
+
+# Un dictionnaire pour suivre les réservations par club pour chaque compétition
+reservations_by_club = {club['name']: {comp['name']: 0 for comp in competitions} for club in clubs}
 
 @app.route('/')
 def index():
@@ -34,21 +25,17 @@ def index():
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
-    email = request.form['email'] 
+    email = request.form['email']
     club = next((club for club in clubs if club['email'] == email), None)
     
     if club:
         current_date = datetime.now()
         future_competitions = [comp for comp in competitions if datetime.strptime(comp['date'], '%Y-%m-%d %H:%M:%S') > current_date]
-
         return render_template('welcome.html', club=club, competitions=future_competitions)
     else:
         flash("L'email saisi n'est pas reconnu. Veuillez essayer à nouveau.")
         return redirect(url_for('index'))
 
-
-
-   
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
     foundClub = next((c for c in clubs if c['name'] == club), None)
@@ -64,26 +51,46 @@ def book(competition, club):
             flash("La compétition est déjà passée. Réservation impossible.")
             return redirect(url_for('index'))
     else:
-        flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
+        flash("Erreur: Club ou compétition introuvable.")
+        return redirect(url_for('index'))
 
-
-
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    competition_name = request.form['competition']
+    club_name = request.form['club']
     placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    
+    competition = next((c for c in competitions if c['name'] == competition_name), None)
+    club = next((c for c in clubs if c['name'] == club_name), None)
+    
+    if not competition or not club:
+        flash('Erreur lors de la réservation. Compétition ou club introuvable.')
+        return redirect(url_for('index'))
 
+    # Vérification du nombre de points du club
+    total_points_needed = placesRequired
+    if int(club['points']) >= total_points_needed:
+        # Mettre à jour les points et les places disponibles
+        club['points'] = int(club['points']) - total_points_needed
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
 
-# TODO: Add route for points display
+        # Mettre à jour le nombre total de places réservées par le club
+        reservations_by_club[club['name']][competition['name']] += placesRequired
 
+        flash(f"Réservation réussie ! Vous avez réservé {placesRequired} places.")
+    else:
+        flash("Vous n'avez pas assez de points pour réserver ces places.")
+        return redirect(url_for('index'))
+
+    # Filtrer les compétitions futures après la réservation
+    current_date = datetime.now()
+    future_competitions = [comp for comp in competitions if datetime.strptime(comp['date'], '%Y-%m-%d %H:%M:%S') > current_date]
+
+    return render_template('welcome.html', club=club, competitions=future_competitions)
 
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
 
-
+if __name__ == "__main__":
+    app.run(debug=True)
