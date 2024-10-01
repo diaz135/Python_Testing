@@ -1,36 +1,142 @@
+<!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary | GUDLFT Registration</title>
-</head>
-<body>
-        <h2>BIENVENUE, {{club['email']}} </h2><a href="{{url_for('logout')}}">Deconnexion</a>
+    <title>Résumé | Inscription GUDLFT</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4; /* Fond gris clair */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-    {% with messages = get_flashed_messages()%}
+        h2 {
+            color: #4682B4; /* Bleu légèrement plus foncé */
+            margin-bottom: 20px;
+            font-size: 28px; /* Taille de police agrandie */
+        }
+
+        a {
+            text-decoration: none;
+            color: #87CEEB; /* Bleu ciel */
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block; /* Pour l'espacement */
+        }
+
+        a:hover {
+            color: #4682B4; /* Bleu légèrement plus foncé pour l'effet de survol */
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+            width: 100%; /* Pour que la liste prenne toute la largeur */
+            max-width: 600px; /* Largeur maximale de la liste */
+        }
+
+        li {
+            background-color: #fff; /* Fond blanc pour les éléments de la liste */
+            border: 1px solid #87CEEB; /* Bordure bleu ciel */
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative; /* Pour le positionnement des liens */
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #87CEEB; /* Ligne de séparation bleu ciel */
+            margin: 10px 0;
+        }
+
+        .flashed-messages {
+            background-color: #e7f3ff; /* Couleur de fond bleu clair pour les messages flash */
+            color: #0056b3; /* Couleur du texte pour les messages d'erreur */
+            border: 1px solid #0056b3; /* Bordure bleue pour les messages d'erreur */
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            max-width: 600px; /* Largeur maximale des messages */
+            text-align: left; /* Alignement du texte */
+        }
+
+        .points {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #87CEEB; /* Couleur bleu ciel pour les points */
+        }
+
+        h3 {
+            color: #4682B4; /* Couleur bleu légèrement plus foncé pour le sous-titre */
+            margin-top: 20px;
+            font-size: 24px; /* Taille de police agrandie pour le sous-titre */
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 24px; /* Taille de police adaptable pour le titre */
+            }
+
+            h3 {
+                font-size: 20px; /* Taille de police adaptable pour le sous-titre */
+            }
+
+            .points {
+                font-size: 16px; /* Taille de police adaptable pour les points */
+            }
+
+            ul {
+                width: 90%; /* Largeur adaptable pour les petits écrans */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>BIENVENUE, {{ club['email'] }}</h2>
+    <a href="{{ url_for('logout') }}">Déconnexion</a>
+
+    {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul>
-       {% for message in messages %}
-            <li>{{message}}</li>
-        {% endfor %}
-       </ul>
-    {% endif%}
-    Points disponibles: {{club['points']}}
-    <h3>Competitions:</h3>
+        <div class="flashed-messages">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="points">Points disponibles: {{ club['points'] }}</div>
+
+    <h3>Compétitions:</h3>
     <ul>
-        {% for comp in competitions%}
-        <li>
-            {{comp['name']}}<br />
-            Date: {{comp['date']}}</br>
-            Nombre de plasses : {{comp['numberOfPlaces']}}
-            {%if comp['numberOfPlaces']|int >0%}
-            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">reserver des places</a>
-            {%endif%}
-        </li>
-        <hr />
+        {% for comp in competitions %}
+            <li>
+                <strong>{{ comp['name'] }}</strong><br />
+                Date: {{ comp['date'] }}<br />
+                Nombre de places: {{ comp['numberOfPlaces'] }}
+                {% if comp['numberOfPlaces']|int > 0 %}
+                    <a href="{{ url_for('book', competition=comp['name'], club=club['name']) }}">Réserver des places</a>
+                {% endif %}
+            </li>
+            <hr />
         {% endfor %}
     </ul>
-    {%endwith%}
-
 </body>
+
 </html>
