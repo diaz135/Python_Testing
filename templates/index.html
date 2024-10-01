@@ -8,9 +8,20 @@
     <h1>Bienvenue sur le portail d'inscription du GUDLFT !!</h1>
     Veuillez saisir l'E-mail de votre secrétaire pour continuer:
     <form action="showSummary" method="post">
+        {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
         <label for="email">Email:</label>
         <input type="email" name="email" id=""/>
         <button type="submit">Valider</button>
     </form>
+    
 </body>
 </html>
