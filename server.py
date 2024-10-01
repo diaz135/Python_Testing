@@ -16,12 +16,10 @@ def loadCompetitions():
 competitions = loadCompetitions()
 clubs = loadClubs()
 
-# Un dictionnaire pour suivre les réservations par club pour chaque compétition
-reservations_by_club = {club['name']: {comp['name']: 0 for comp in competitions} for club in clubs}
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Passer la liste des clubs à la page d'accueil
+    return render_template('index.html', clubs=clubs)
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
@@ -45,7 +43,7 @@ def book(competition, club):
         competition_date = datetime.strptime(foundCompetition['date'], '%Y-%m-%d %H:%M:%S')
         current_date = datetime.now()
 
-        if competition_date > current_date:  # Vérification si la date de compétition est future
+        if competition_date > current_date:
             return render_template('booking.html', club=foundClub, competition=foundCompetition)
         else:
             flash("La compétition est déjà passée. Réservation impossible.")
@@ -58,17 +56,15 @@ def book(competition, club):
 def purchasePlaces():
     competition_name = request.form['competition']
     club_name = request.form['club']
+    placesRequired = request.form['places']
 
-    # Vérification que le nombre de places est un entier
-    try:
-        placesRequired = int(request.form['places'])
-        if placesRequired <= 0:
-            flash("Le nombre de places doit être un entier positif.")
-            return redirect(request.referrer or url_for('index'))
-    except ValueError:
-        flash("Veuillez entrer un nombre entier valide pour les places.")
-        return redirect(request.referrer or url_for('index'))
+    # Validation si placesRequired est un entier et positif
+    if not placesRequired.isdigit() or int(placesRequired) <= 0:
+        flash("Le nombre de places doit être un entier positif.")
+        return redirect(url_for('index'))
 
+    placesRequired = int(placesRequired)
+    
     competition = next((c for c in competitions if c['name'] == competition_name), None)
     club = next((c for c in clubs if c['name'] == club_name), None)
     
@@ -76,20 +72,14 @@ def purchasePlaces():
         flash('Erreur lors de la réservation. Compétition ou club introuvable.')
         return redirect(url_for('index'))
 
-    # Vérification du nombre de points du club
+    # Vérification des points disponibles
     total_points_needed = placesRequired
     if int(club['points']) >= total_points_needed:
-        # Mettre à jour les points et les places disponibles
         club['points'] = int(club['points']) - total_points_needed
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-
-        # Mettre à jour le nombre total de places réservées par le club
-        reservations_by_club[club['name']][competition['name']] += placesRequired
-
         flash(f"Réservation réussie ! Vous avez réservé {placesRequired} places.")
     else:
         flash("Vous n'avez pas assez de points pour réserver ces places.")
-        return redirect(url_for('index'))
 
     # Filtrer les compétitions futures après la réservation
     current_date = datetime.now()
