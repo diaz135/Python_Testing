@@ -2,6 +2,14 @@ import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return 'Hello, Flask!'
+
+
+
 def loadClubs():
     with open('clubs.json') as c:
          listOfClubs = json.load(c)['clubs']
@@ -57,3 +65,5 @@ def purchasePlaces():
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+
