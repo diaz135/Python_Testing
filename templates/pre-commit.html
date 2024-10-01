@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmer la réservation</title>
+</head>
+<body>
+    <h2>Confirmation de la réservation</h2>
+    <p>Vous êtes sur le point de réserver {{ placesRequired }} places pour la compétition {{ competition['name'] }}.</p>
+    
+    <form action="/purchasePlaces" method="post">
+        <input type="hidden" name="club" value="{{ club['name'] }}">
+        <input type="hidden" name="competition" value="{{ competition['name'] }}">
+        <input type="hidden" name="places" value="{{ placesRequired }}">
+        
+        <button type="submit">Confirmer la réservation</button>
+    </form>
+
+    <form action="/book/{{ competition['name'] }}/{{ club['name'] }}" method="get">
+        <button type="submit">Annuler</button>
+    </form>
+</body>
+</html>

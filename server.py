@@ -55,9 +55,9 @@ def book(competition, club):
         flash("Erreur: Club ou compétition introuvable.")
         return redirect(url_for('index'))
 
-# Gérer l'achat de places
-@app.route('/purchasePlaces', methods=['POST'])
-def purchasePlaces():
+# Pré-commander des places (pré-validation)
+@app.route('/prePurchasePlaces', methods=['POST'])
+def prePurchasePlaces():
     competition_name = request.form['competition']
     club_name = request.form['club']
     placesRequired = request.form['places']
@@ -87,8 +87,27 @@ def purchasePlaces():
         flash("Il n'y a pas assez de places disponibles pour cette compétition.")
         return render_template('booking.html', club=club, competition=competition)
 
+    # Pré-validation avant réservation
+    return render_template('precommit.html', club=club, competition=competition, placesRequired=placesRequired)
+
+# Confirmer l'achat de places
+@app.route('/purchasePlaces', methods=['POST'])
+def purchasePlaces():
+    competition_name = request.form['competition']
+    club_name = request.form['club']
+    placesRequired = int(request.form['places'])
+
+    competition = next((c for c in competitions if c['name'] == competition_name), None)
+    club = next((c for c in clubs if c['name'] == club_name), None)
+
     # Vérification des points disponibles pour le club
     total_points_needed = placesRequired
+
+    # Vérification de la limite de 12 places maximum par club
+    if placesRequired > 12:
+        flash("Vous ne pouvez pas réserver plus de 12 places.")
+        return render_template('booking.html', club=club, competition=competition)
+
     if int(club['points']) >= total_points_needed:
         club['points'] = int(club['points']) - total_points_needed
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
