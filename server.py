@@ -58,8 +58,17 @@ def book(competition, club):
 def purchasePlaces():
     competition_name = request.form['competition']
     club_name = request.form['club']
-    placesRequired = int(request.form['places'])
-    
+
+    # Vérification que le nombre de places est un entier
+    try:
+        placesRequired = int(request.form['places'])
+        if placesRequired <= 0:
+            flash("Le nombre de places doit être un entier positif.")
+            return redirect(request.referrer or url_for('index'))
+    except ValueError:
+        flash("Veuillez entrer un nombre entier valide pour les places.")
+        return redirect(request.referrer or url_for('index'))
+
     competition = next((c for c in competitions if c['name'] == competition_name), None)
     club = next((c for c in clubs if c['name'] == club_name), None)
     
