@@ -1,6 +1,6 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
-
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -38,26 +38,35 @@ def showSummary():
     club = next((club for club in clubs if club['email'] == email), None)
     
     if club:
-      
-        return render_template('welcome.html', club=club, competitions=competitions)
-    else:
-       
-        flash("L'email saisi n'est pas reconnu. Veuillez essayer à nouveau.")
-        return redirect(url_for('index')) 
+        current_date = datetime.now()
+        future_competitions = [comp for comp in competitions if datetime.strptime(comp['date'], '%Y-%m-%d %H:%M:%S') > current_date]
 
+        return render_template('welcome.html', club=club, competitions=future_competitions)
+    else:
+        flash("L'email saisi n'est pas reconnu. Veuillez essayer à nouveau.")
+        return redirect(url_for('index'))
 
 
 
    
 @app.route('/book/<competition>/<club>')
-def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+def book(competition, club):
+    foundClub = next((c for c in clubs if c['name'] == club), None)
+    foundCompetition = next((c for c in competitions if c['name'] == competition), None)
+    
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        competition_date = datetime.strptime(foundCompetition['date'], '%Y-%m-%d %H:%M:%S')
+        current_date = datetime.now()
+
+        if competition_date > current_date:  # Vérification si la date de compétition est future
+            return render_template('booking.html', club=foundClub, competition=foundCompetition)
+        else:
+            flash("La compétition est déjà passée. Réservation impossible.")
+            return redirect(url_for('index'))
     else:
         flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
+
 
 
 @app.route('/purchasePlaces',methods=['POST'])
