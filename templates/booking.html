@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation pour {{ competition['name'] }} || GUDLFT</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+            border: 2px solid #87CEEB;
+        }
+
+        h2 {
+            color: #4682B4;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .flashed-messages {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-align: left;
+            color: #555;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #87CEEB;
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #87CEEB;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4682B4;
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                width: 90%;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>{{ competition['name'] }}</h2>
+        <p>Places disponibles : <strong>{{ competition['numberOfPlaces'] }}</strong></p>
+
+        <!-- Affichage des messages d'erreur -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flashed-messages">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <form action="/purchasePlaces" method="post">
+            <input type="hidden" name="club" value="{{ club['name'] }}">
+            <input type="hidden" name="competition" value="{{ competition['name'] }}">
+
+            <label for="places">Combien de places souhaitez-vous reserver ?</label>
+            <input type="number" name="places" id="places" min="1" max="{{ competition['numberOfPlaces'] }}" required>
+
+            <button type="submit">Reserver</button>
+        </form>
+    </div>
+</body>
+
+</html>

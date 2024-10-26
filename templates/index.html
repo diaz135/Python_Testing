@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail GUDLFT</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4; /* Fond gris clair */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4682B4; /* Bleu légèrement plus foncé */
+            margin-bottom: 20px;
+            font-size: 28px; /* Taille de police agrandie */
+        }
+
+        h2 {
+            color: #4682B4; /* Bleu légèrement plus foncé */
+            margin-top: 40px;
+            margin-bottom: 10px;
+            font-size: 24px; /* Taille de police pour le sous-titre */
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #333; /* Texte sombre pour une meilleure lisibilité */
+        }
+
+        form {
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+            color: #555; /* Couleur du texte pour le label */
+        }
+
+        input[type="email"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px; /* Coins arrondis */
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            width: 300px; /* Largeur fixe pour le champ d'email */
+            transition: border-color 0.3s; /* Transition pour l'effet */
+        }
+
+        input[type="email"]:focus {
+            border-color: #87CEEB; /* Bordure bleue au focus */
+            outline: none; /* Supprimer le contour par défaut */
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #87CEEB; /* Bleu ciel */
+            color: #fff;
+            border: none;
+            border-radius: 6px; /* Coins arrondis */
+            cursor: pointer;
+            transition: background-color 0.3s; /* Transition pour l'effet */
+        }
+
+        button:hover {
+            background-color: #4682B4; /* Bleu légèrement plus foncé pour l'effet de survol */
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 0 auto; /* Centrer la table */
+            margin-top: 20px;
+            border: 1px solid #87CEEB; /* Bordure bleu ciel */
+        }
+
+        th,
+        td {
+            border: 1px solid #87CEEB; /* Bordure bleu ciel */
+            padding: 10px;
+            text-align: center;
+            color: #333; /* Couleur du texte pour les cellules */
+        }
+
+        th {
+            background-color: #87CEEB; /* Bleu ciel pour les en-têtes */
+            color: #fff;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Lignes alternées pour une meilleure lisibilité */
+        }
+
+        /* Responsive design */
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 24px; /* Taille de police adaptable pour le titre */
+            }
+
+            h2 {
+                font-size: 20px; /* Taille de police adaptable pour le sous-titre */
+            }
+
+            input[type="email"] {
+                width: 90%; /* Largeur adaptable pour les petits écrans */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Bienvenue sur le portail pour les inscriptions du GUDLFT</h1>
+
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li style="color: red;">{{ message }}</li> <!-- Couleur rouge pour les messages d'erreur -->
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <p>Veuillez saisir l'E-mail de votre secrétaire pour continuer :</p>
+    
+    <form method="POST" action="{{ url_for('showSummary') }}">
+        <label for="email">Email :</label>
+        <input type="email" name="email" required>
+        <button type="submit">Valider</button>
+    </form>
+
+    <!-- Table affichant les points de chaque club -->
+    <h2>Points des Clubs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Club</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for club in clubs %}
+            <tr>
+                <td>{{ club.name }}</td>
+                <td>{{ club.points }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
